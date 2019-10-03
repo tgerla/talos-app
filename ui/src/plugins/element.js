@@ -10,6 +10,7 @@ import {
     Loading,
     Timeline,
     TimelineItem,
+    Tree,
     Input,
     Drawer,
     Container,
@@ -34,6 +35,7 @@ Vue.use(TableColumn)
 Vue.use(Loading)
 Vue.use(Timeline)
 Vue.use(TimelineItem)
+Vue.use(Tree)
 Vue.use(Input)
 Vue.use(Drawer)
 Vue.use(Container)

@@ -20,7 +20,7 @@ type UIEvent struct {
 }
 
 func newClient() (*client.Client, error) {
-	t, creds, err := client.NewClientTargetAndCredentialsFromConfig("/Users/andrewrynhard/workspace/.talos/config")
+	t, creds, err := client.NewClientTargetAndCredentialsFromConfig("/Users/tgerla/.talos/config")
 	if err != nil {
 		return nil, errors.Wrap(err, "error getting client credentials")
 	}

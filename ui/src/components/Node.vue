@@ -1,10 +1,10 @@
 <template>
   <div id="node">
-    <div>
-      <p>{{version}}</p>
+    <div id="nodeops">
+      <NodeOps :value="version" />
     </div>
     <div>
-      <el-tabs v-model="active" v-loading="loading" @tab-click="handleClick" stretch="true">
+      <el-tabs  type="border-card" v-model="active" v-loading="loading" @tab-click="handleClick" stretch="true">
         <el-tab-pane label="Services" name="services">
           <Services v-model="services" height="100%" />
         </el-tab-pane>
@@ -35,6 +35,7 @@ import Processes from "./Processes.vue";
 import Routes from "./Routes.vue";
 import Interfaces from "./Interfaces.vue";
 import Mounts from "./Mounts.vue";
+import NodeOps from "./NodeOps.vue";
 
 export default {
   components: {
@@ -43,7 +44,8 @@ export default {
     Processes,
     Routes,
     Interfaces,
-    Mounts
+    Mounts,
+    NodeOps
   },
 
   data() {
@@ -56,7 +58,7 @@ export default {
       processes: [],
       routes: [],
       interfaces: [],
-      mounts: []
+      mounts: [],
     };
   },
 
@@ -103,6 +105,6 @@ export default {
   padding-bottom: 40px;
   padding-left: 50px;
   padding-right: 50px;
-  text-align: center;
+  text-align: left;
 }
 </style>

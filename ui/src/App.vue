@@ -2,6 +2,10 @@
   <div id="app">
     <el-container>
       <div style="width: auto;">
+        <div style="text-align: center;">
+          <img id="logo" src="./assets/logo.png" />
+        </div>
+
         <el-button
           type="text"
           v-model="collapse"
@@ -21,67 +25,39 @@
               <i class="el-icon-s-grid"></i>
               <span slot="title">Clusters</span>
             </template>
-            <el-menu-item-group>
-              <span slot="title">AWS</span>
-              <el-menu-item index="1-1">prod</el-menu-item>
-              <el-menu-item index="1-2">stage</el-menu-item>
-              <el-menu-item index="1-3">test</el-menu-item>
-            </el-menu-item-group>
-            <el-menu-item-group>
-              <span slot="title">GCP</span>
-              <el-menu-item index="2-1">prod</el-menu-item>
-              <el-menu-item index="2-2">stage</el-menu-item>
-              <el-menu-item index="2-3">test</el-menu-item>
-            </el-menu-item-group>
-            <el-menu-item-group>
-              <span slot="title">Packet</span>
-              <el-menu-item index="3-1">infra</el-menu-item>
-            </el-menu-item-group>
+            <el-tree :data="treeData" />
           </el-submenu>
           <el-menu-item index="2">
             <i class="el-icon-s-tools"></i>
             <span slot="title">Settings</span>
           </el-menu-item>
+
+          <el-divider></el-divider>
+
+          <router-link :to="{ path: '/cluster' }">
+            <el-menu-item index="3">
+              <i class="el-icon-s-tools"></i>
+              <span slot="title">TEST Cluster View</span>
+            </el-menu-item>
+          </router-link>
+
+          <router-link :to="{path: '/node' }">
+            <el-menu-item index="4">
+              <i class="el-icon-s-tools"></i>
+              <span slot="title">TEST Node View</span>
+            </el-menu-item>
+          </router>          
+
         </el-menu>
       </div>
       <el-container>
-        <el-header style="height: 40px; text-align: right; font-size: 12px">
-          <el-button icon="el-icon-s-operation" @click="drawer = true" circle></el-button>
-        </el-header>
-
         <el-main>
-          <div style="text-align: center;">
-            <div>
-              <img id="logo" src="./assets/logo.png" />
-            </div>
-            <div>
-              <el-select v-model="node" placeholder="Node" height="20px" width="400px">
-                <el-option
-                  v-for="item in options"
-                  :key="item.name"
-                  :label="item.name"
-                  :value="item.name"
-                ></el-option>
-              </el-select>
-            </div>
-          </div>
-          <Node />
-          <el-drawer :visible.sync="drawer">
-            <el-container>
-              <el-main>
-                <el-container direction="vertical">
-                  <el-button-group>
-                    <el-button type="primary" @click="handleShutdown" icon="el-icon-switch-button"></el-button>
-                    <el-button type="primary" @click="handleReboot" icon="el-icon-refresh-right"></el-button>
-                  </el-button-group>
-                  <el-button-group>
-                    <el-button type="primary" @click="handleUpgrade" icon="el-icon-top"></el-button>
-                    <el-button type="primary" @click="handleReset" icon="el-icon-refresh"></el-button>
-                  </el-button-group>
-                </el-container>
-              </el-main>
-            </el-container>
-          </el-drawer>
+          <el-breadcrumb separator-class="el-icon-arrow-right">
+            <el-breadcrumb-item :to="{ path: '/' }">Local Clusters</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: '/' }">cluster-1</el-breadcrumb-item>
+            <el-breadcrumb-item>node 1</el-breadcrumb-item>
+          </el-breadcrumb>
+          <router-view></router-view>
         </el-main>
       </el-container>
     </el-container>
@@ -99,10 +75,56 @@ export default {
 
   data() {
     return {
-      collapse: true,
+      collapse: false,
       drawer: false,
       node: "",
       version: "",
+      treeData: [{
+          label: 'Local Clusters',
+          children: [{
+            label: 'cluster-1',
+            children: [
+              {label: 'node 1'},
+              {label: 'node 2'},
+            ]
+          }]
+        },{
+          label: 'AWS',
+          children: [{
+            label: 'cluster-2',
+            children: [
+              {label: 'node 1'},
+              {label: 'node 2'},
+            ]
+          }]
+        }, {
+          label: 'Azure',
+          children: [{
+            label: 'cluster-b',
+            children: [
+              {label: 'node 1'},
+              {label: 'node 2'},
+            ]
+          }, {
+            label: 'cluster-c',
+            children: [{
+              label: 'node 1'
+            }]
+          }]
+        }, {
+          label: 'Packet Hosting',
+          children: [{
+            label: 'cluster-4',
+            children: [{
+              label: 'node 1'
+            }]
+          }, {
+            label: 'cluster-5',
+            children: [{
+              label: 'node 1'
+            }]
+          }]
+        }],
       options: [
         {
           name: "node-1"
@@ -224,12 +246,18 @@ export default {
 }
 
 #logo {
-  height: 150px;
-  width: 150px;
+  height: 75px;
+  width: 75px;
+  padding: 10px;
 }
 
 .el-menu-vertical:not(.el-menu--collapse) {
   width: 200px;
   min-height: 100%;
 }
+
+ul.el-menu a {
+  text-decoration: none;
+}
+
 </style>
