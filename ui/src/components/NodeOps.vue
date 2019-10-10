@@ -27,7 +27,7 @@
 
 <script>
 export default {
-  props: ["value", "height"]
+  props: ['value', 'height'],
 };
 </script>
 

@@ -7,6 +7,8 @@ require (
 	github.com/otiai10/curr v0.0.0-20190513014714-f5a3d24e5776 // indirect
 	github.com/pkg/errors v0.8.1
 	github.com/talos-systems/talos v0.1.0
+	k8s.io/apimachinery v0.0.0
+	k8s.io/client-go v0.0.0
 )
 
 replace (

@@ -46,7 +46,7 @@
               <i class="el-icon-s-tools"></i>
               <span slot="title">TEST Node View</span>
             </el-menu-item>
-          </router>          
+          </router-link>
 
         </el-menu>
       </div>
@@ -70,61 +70,22 @@ import Node from "./components/Node.vue";
 export default {
   name: "app",
   components: {
-    Node
+    Node,
   },
+
+  mounted() {
+    this.update("nodes");
+  },
+
 
   data() {
     return {
       collapse: false,
       drawer: false,
+      nodes: [],
       node: "",
       version: "",
-      treeData: [{
-          label: 'Local Clusters',
-          children: [{
-            label: 'cluster-1',
-            children: [
-              {label: 'node 1'},
-              {label: 'node 2'},
-            ]
-          }]
-        },{
-          label: 'AWS',
-          children: [{
-            label: 'cluster-2',
-            children: [
-              {label: 'node 1'},
-              {label: 'node 2'},
-            ]
-          }]
-        }, {
-          label: 'Azure',
-          children: [{
-            label: 'cluster-b',
-            children: [
-              {label: 'node 1'},
-              {label: 'node 2'},
-            ]
-          }, {
-            label: 'cluster-c',
-            children: [{
-              label: 'node 1'
-            }]
-          }]
-        }, {
-          label: 'Packet Hosting',
-          children: [{
-            label: 'cluster-4',
-            children: [{
-              label: 'node 1'
-            }]
-          }, {
-            label: 'cluster-5',
-            children: [{
-              label: 'node 1'
-            }]
-          }]
-        }],
+      treeData: [],
       options: [
         {
           name: "node-1"
@@ -231,6 +192,45 @@ export default {
             message: h("p", null, [h("span", null, "Upgrade canceled")])
           });
         });
+    },
+
+    // FIXME: this is duplicate code of the update() method in Node.vue,
+    // but I'm sure there's a better way to not repeat ourselves.
+    update(type) {
+      let ws = new WebSocket(
+        "ws://localhost:" + global.backendPort + "/web/app/events"
+      );
+
+      ws.onmessage = message => {
+        let obj = JSON.parse(message.data);
+        if (obj.type == type) {
+          this[type] = JSON.parse(obj.event);
+          console.log(this[type]);
+        }
+
+        // FIXME: there's probably a better place for this "business logic" to construct
+        // the menu data structure (treeData) from the raw JSON returned by the k8s API call.
+        switch(type) {
+          case "nodes":
+            // build the sidebar cluster menu based on the "get nodes" result from k8s
+            var treeData = [{label: "Local Cluster", children: []}];
+            for(var node of this['nodes']) {
+              treeData[0]['children'].push({label: node.metadata.name});
+            }
+            console.log(treeData);
+            this['treeData'] = treeData;
+        }
+        this.loading = false;
+      };
+
+      ws.onopen = () => {
+        this.loading = true;
+        ws.send(
+          JSON.stringify({
+            event: type
+          })
+        );
+      };
     }
   }
 };

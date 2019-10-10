@@ -4,6 +4,9 @@
       <NodeOps :value="version" />
     </div>
     <div>
+      {{ nodes }}
+    </div>
+    <div>
       <el-tabs  type="border-card" v-model="active" v-loading="loading" @tab-click="handleClick" stretch="true">
         <el-tab-pane label="Services" name="services">
           <Services v-model="services" height="100%" />
@@ -74,12 +77,12 @@ export default {
 
     update(type) {
       let ws = new WebSocket(
-        "ws://localhost:" + global.backendPort + "/web/app/events"
+        "ws://localhost:" + global.backendPort + "/web/app/events",
       );
 
       ws.onmessage = message => {
         let obj = JSON.parse(message.data);
-        if (obj.type == type) {
+        if (obj.type === type) {
           this[type] = JSON.parse(obj.event);
           console.log(this[type]);
         }

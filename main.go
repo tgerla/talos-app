@@ -3,8 +3,11 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"log"
+	"os"
+	"path/filepath"
 
 	"github.com/Equanox/gotron"
 	"github.com/pkg/errors"
@@ -12,6 +15,10 @@ import (
 	proto "github.com/talos-systems/talos/api/os"
 	"github.com/talos-systems/talos/cmd/osctl/pkg/client"
 	"github.com/talos-systems/talos/pkg/constants"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
 type UIEvent struct {
@@ -20,7 +27,8 @@ type UIEvent struct {
 }
 
 func newClient() (*client.Client, error) {
-	t, creds, err := client.NewClientTargetAndCredentialsFromConfig("/Users/tgerla/.talos/config")
+	home := homeDir()
+	t, creds, err := client.NewClientTargetAndCredentialsFromConfig(filepath.Join(home, ".talos", "config"))
 	if err != nil {
 		return nil, errors.Wrap(err, "error getting client credentials")
 	}
@@ -30,6 +38,37 @@ func newClient() (*client.Client, error) {
 	}
 
 	return c, nil
+}
+
+func newKubernetesClient() (*kubernetes.Clientset, error) {
+	var kubeconfig *string
+	if home := homeDir(); home != "" {
+		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
+	} else {
+		kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
+	}
+	flag.Parse()
+
+	// use the current context in kubeconfig
+	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	// create the clientset
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		panic(err.Error())
+	}
+	return clientset, err
+}
+
+// from https://github.com/kubernetes/client-go/blob/master/examples/out-of-cluster-client-configuration/main.go
+func homeDir() string {
+	if h := os.Getenv("HOME"); h != "" {
+		return h
+	}
+	return os.Getenv("USERPROFILE") // windows
 }
 
 func main() {
@@ -165,6 +204,38 @@ func main() {
 			fmt.Println("error:", err)
 		}
 		window.Send(&UIEvent{Event: &gotron.Event{string(b)}, Type: "mounts"})
+	})
+
+	window.On(&gotron.Event{Event: "nodes"}, func(bin []byte) {
+		var clientset *kubernetes.Clientset
+
+		clientset, err := newKubernetesClient()
+		if err != nil {
+			panic(err.Error())
+		}
+
+		nodes, err := clientset.CoreV1().Nodes().List(metav1.ListOptions{})
+		if err != nil {
+			panic(err.Error())
+		}
+
+		//		s := k8sjson.NewSerializerWithOptions(k8sjson.DefaultMetaFactory, scheme.Scheme,
+		//			scheme.Scheme, k8sjson.SerializerOptions{Yaml: false, Pretty: false, Strict: false})
+
+		// FIXME
+		// I tried using the k8sjson serializer (above) to directly serialize the nodes.Items
+		// list, but it complains about the object lacking a deep copy method. 🤷‍♂️
+		//
+		// This method to iterate over each object in nodes.Items and add them to a list
+		// and then marshalling the list into Electron seems to work, but  wouldn't be surprised
+		// if there was a better way.
+		var nodeList []interface{}
+
+		for _, n := range nodes.Items {
+			nodeList = append(nodeList, n)
+		}
+		b, err := json.Marshal(nodeList)
+		window.Send(&UIEvent{Event: &gotron.Event{string(b)}, Type: "nodes"})
 	})
 
 	// Wait for the application to close

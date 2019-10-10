@@ -21,14 +21,14 @@
 
 <script>
 export default {
-  props: ["value", "height"],
+  props: ['value', 'height'],
 
   methods: {
     formatTime: function(timestamp) {
       const t = new Date(0);
       t.setUTCSeconds(timestamp.seconds);
       return t.toLocaleString();
-    }
-  }
+    },
+  },
 };
 </script>
