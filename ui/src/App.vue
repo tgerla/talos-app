@@ -51,7 +51,7 @@
         </el-menu>
       </div>
       <el-container>
-        <el-main>
+        <el-main> <!-- FIXME - make the breadcrumbs dynamic -->
           <el-breadcrumb separator-class="el-icon-arrow-right">
             <el-breadcrumb-item :to="{ path: '/' }">Local Clusters</el-breadcrumb-item>
             <el-breadcrumb-item :to="{ path: '/' }">cluster-1</el-breadcrumb-item>
@@ -205,6 +205,7 @@ export default {
         let obj = JSON.parse(message.data);
         if (obj.type == type) {
           this[type] = JSON.parse(obj.event);
+          console.log(type);
           console.log(this[type]);
         }
 
@@ -215,8 +216,10 @@ export default {
             // build the sidebar cluster menu based on the "get nodes" result from k8s
             var treeData = [{label: "Local Cluster", children: []}];
             for(var node of this['nodes']) {
-              treeData[0]['children'].push({label: node.metadata.name});
+              treeData[0]['children'].push({label: node.metadata.name,
+                                            uid: node.metadata.uid});
             }
+            console.log("treeData next");
             console.log(treeData);
             this['treeData'] = treeData;
         }

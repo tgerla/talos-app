@@ -26,7 +26,7 @@ type UIEvent struct {
 	Type string `json:"type"`
 }
 
-func newClient() (*client.Client, error) {
+func newTalosClient() (*client.Client, error) {
 	home := homeDir()
 	t, creds, err := client.NewClientTargetAndCredentialsFromConfig(filepath.Join(home, ".talos", "config"))
 	if err != nil {
@@ -95,7 +95,7 @@ func main() {
 	// window.OpenDevTools()
 
 	window.On(&gotron.Event{Event: "version"}, func(bin []byte) {
-		c, err := newClient()
+		c, err := newTalosClient()
 		if err != nil {
 			log.Printf("%+v", err)
 		}
@@ -111,7 +111,7 @@ func main() {
 	})
 
 	window.On(&gotron.Event{Event: "services"}, func(bin []byte) {
-		c, err := newClient()
+		c, err := newTalosClient()
 		if err != nil {
 			log.Printf("%+v", err)
 		}
@@ -127,7 +127,7 @@ func main() {
 	})
 
 	window.On(&gotron.Event{Event: "containers"}, func(bin []byte) {
-		c, err := newClient()
+		c, err := newTalosClient()
 		if err != nil {
 			log.Printf("%+v", err)
 		}
@@ -143,7 +143,7 @@ func main() {
 	})
 
 	window.On(&gotron.Event{Event: "processes"}, func(bin []byte) {
-		c, err := newClient()
+		c, err := newTalosClient()
 		if err != nil {
 			log.Printf("%+v", err)
 		}
@@ -159,7 +159,7 @@ func main() {
 	})
 
 	window.On(&gotron.Event{Event: "routes"}, func(bin []byte) {
-		c, err := newClient()
+		c, err := newTalosClient()
 		if err != nil {
 			log.Printf("%+v", err)
 		}
@@ -175,7 +175,7 @@ func main() {
 	})
 
 	window.On(&gotron.Event{Event: "interfaces"}, func(bin []byte) {
-		c, err := newClient()
+		c, err := newTalosClient()
 		if err != nil {
 			log.Printf("%+v", err)
 		}
@@ -191,7 +191,7 @@ func main() {
 	})
 
 	window.On(&gotron.Event{Event: "mounts"}, func(bin []byte) {
-		c, err := newClient()
+		c, err := newTalosClient()
 		if err != nil {
 			log.Printf("%+v", err)
 		}
@@ -211,12 +211,14 @@ func main() {
 
 		clientset, err := newKubernetesClient()
 		if err != nil {
-			panic(err.Error())
+			fmt.Println(err)
+			panic(err)
 		}
 
 		nodes, err := clientset.CoreV1().Nodes().List(metav1.ListOptions{})
 		if err != nil {
-			panic(err.Error())
+			fmt.Println(err)
+			panic(err)
 		}
 
 		//		s := k8sjson.NewSerializerWithOptions(k8sjson.DefaultMetaFactory, scheme.Scheme,
